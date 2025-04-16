@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Garbage Analytics Dashboard</title>
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --primary: #34a853;
+        --secondary: #4285f4;
+        --accent: #ea4335;
+        --text: #333;
+        --light-bg: #f8f9fa;
+        --card-bg: #fff;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: var(--light-bg);
+        color: var(--text);
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .dashboard-header {
+        text-align: center;
+        padding: 20px 0 30px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 30px;
+      }
+
+      .dashboard-header h1 {
+        color: var(--primary);
+        margin-bottom: 10px;
+        font-size: 2.2rem;
+      }
+
+      .dashboard-header p {
+        color: #666;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      .section-header {
+        margin: 30px 0 20px;
+        padding-left: 20px;
+        border-left: 4px solid var(--primary);
+        font-size: 1.5rem;
+        color: var(--text);
+      }
+
+      .chart-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .chart-box {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        height: 350px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--secondary);
+      }
+
+      .chart-wrapper {
+        flex: 1;
+        position: relative;
+      }
+
+      /* Add specific style for pie chart container */
+      .pie-chart-wrapper {
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .pie-chart-wrapper canvas {
+        max-width: 70% !important;
+        max-height: 70% !important;
+      }
+
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .composition-insights {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        margin-bottom: 40px;
+      }
+
+      .composition-insights h3 {
+        color: var(--secondary);
+        margin-bottom: 15px;
+      }
+
+      .insight-item {
+        margin-bottom: 10px;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .insight-item:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: var(--primary);
+        font-size: 1.5rem;
+        line-height: 1;
+      }
+
+      .waste-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .waste-stat {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .waste-stat h4 {
+        margin: 0 0 5px;
+        color: var(--secondary);
+      }
+
+      .waste-stat .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary);
+      }
+
+      @media (max-width: 768px) {
+        .chart-container {
+          grid-template-columns: 1fr;
+        }
+
+        .chart-box {
+          height: 300px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="dashboard-header">
+        <h1>Garbage Analytics Dashboard</h1>
+        <p>
+          Real-time analytics and insights for waste management optimization
+        </p>
+      </div>
+
+      <h2 class="section-header">Weekly Collection Analysis</h2>
+      <div class="chart-container">
+        <div class="chart-box">
+          <div class="chart-title">Weekly Waste Summary</div>
+          <div class="chart-wrapper">
+            <canvas id="weeklySummaryChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Weekly Collection Peaks</div>
+          <div class="chart-wrapper">
+            <canvas id="weeklyPeaksChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-header">Daily Usage Patterns</h2>
+      <div class="chart-container">
+        <div class="chart-box">
+          <div class="chart-title">Average Fill Rates by Hour</div>
+          <div class="chart-wrapper">
+            <canvas id="avgFillByHourChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Daily Fill Level Trends</div>
+          <div class="chart-wrapper">
+            <canvas id="dailyFillTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-header">Waste Composition Analysis</h2>
+      <div class="chart-container">
+        <div class="chart-box">
+          <div class="chart-title">Waste Composition</div>
+          <div class="pie-chart-wrapper">
+            <canvas id="wasteCompositionChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Waste Trends by Type</div>
+          <div class="chart-wrapper">
+            <canvas id="wasteTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="composition-insights">
+        <h3>Key Waste Composition Insights</h3>
+        <div id="compositionInsights"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
